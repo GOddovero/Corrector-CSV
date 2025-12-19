@@ -320,7 +320,7 @@ function safe_output_filename(string $originalName): string {
     $base = preg_replace('/\.[^.]+$/', '', $base) ?? $base;
     // Evitar caracteres problemáticos en header Content-Disposition
     $base = preg_replace('/[^A-Za-z0-9 _()\[\].-]+/', '_', $base) ?? 'archivo';
-    return $base . '_arreglado.csv';
+    return 'online_' . $base . '_arreglado.csv';
 }
 
 // Si se incluye desde CLI (por ejemplo verify.php), no ejecutar la parte web.
