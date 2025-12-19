@@ -368,13 +368,388 @@ if ($requestMethod === null) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Arreglar CSV</title>
+  <title>Corrector CSV | GOH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5; /* Indigo 600 */
+      --primary-hover: #4338ca; /* Indigo 700 */
+      --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-main: #111827;
+      --text-secondary: #6b7280;
+      --border-color: #e5e7eb;
+      --error-bg: #fef2f2;
+      --error-text: #991b1b;
+      --error-border: #f87171;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 3rem 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: transform 0.3s ease;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      margin-top: 0;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Drag & Drop Zone */
+    .upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 1rem;
+      padding: 2.5rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #f8fafc;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-area:hover, .upload-area.dragover {
+      border-color: var(--primary);
+      background: #eef2ff;
+    }
+
+    .upload-area input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      color: #94a3b8;
+      margin-bottom: 1rem;
+      transition: color 0.2s;
+    }
+
+    .upload-area:hover .upload-icon {
+      color: var(--primary);
+    }
+
+    .upload-text {
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+
+    .upload-hint {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* Button (Hidden by default if auto-submit, but good to have for fallback or status) */
+    .status-btn {
+      margin-top: 1.5rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      width: 100%;
+      cursor: default;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    
+    .status-btn.loading {
+      opacity: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    /* Error Box */
+    .error-message {
+      background-color: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
+      padding: 1rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1.5rem;
+      text-align: left;
+      font-size: 0.9rem;
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Footer & Credits */
+    .footer-note {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.5;
+      max-width: 400px;
+    }
+
+    .credits {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    .credits a {
+      pointer-events: auto;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 0.5rem 1.25rem;
+      border-radius: 2rem;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .credits a:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .credits img {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+    }
+    
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #ffffff;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <h1>Arreglar CSV</h1>
-  <form method="post" enctype="multipart/form-data">
-    <input type="file" name="csv" accept=".csv,text/csv" required />
-    <button type="submit">Convertir</button>
-  </form>
+
+<div class="container">
+  <div class="card">
+    <h1>Corrector CSV</h1>
+    <p class="subtitle">Sube tu archivo para corregir el formato automáticamente</p>
+    
+    <div id="error-box" class="error-message">
+      <strong>⚠️ Error detectado:</strong>
+      <span id="error-text"></span>
+    </div>
+
+    <form id="uploadForm" method="post" enctype="multipart/form-data">
+      <div class="upload-area" id="dropZone">
+        <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        <div class="upload-text">Haz clic o arrastra tu archivo aquí</div>
+        <div class="upload-hint">Soporta archivos .CSV</div>
+        <input type="file" name="csv" id="csvInput" accept=".csv,text/csv" required />
+      </div>
+      
+      <button type="button" class="status-btn" id="statusBtn">
+        <span class="spinner"></span> Procesando...
+      </button>
+    </form>
+  </div>
+
+  <div class="footer-note">
+    Por seguridad y transparencia ningún archivo se guarda en el servidor.
+    El procesamiento se realiza en tiempo real y el resultado se descarga automáticamente.
+  </div>
+  
+  <div class="credits">
+    <a href="https://goh-dev.com.ar/" target="_blank" rel="noopener noreferrer">
+      <span>Desarrollado por GOH</span>
+      <img src="png1.png" alt="Logo GOH" />
+    </a>
+  </div>
+</div>
+
+<script>
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('csvInput');
+  const form = document.getElementById('uploadForm');
+  const errorBox = document.getElementById('error-box');
+  const errorText = document.getElementById('error-text');
+  const statusBtn = document.getElementById('statusBtn');
+
+  // Drag & Drop visual effects
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight(e) {
+    dropZone.classList.add('dragover');
+  }
+
+  function unhighlight(e) {
+    dropZone.classList.remove('dragover');
+  }
+
+  dropZone.addEventListener('drop', handleDrop, false);
+
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    fileInput.files = files;
+    handleFiles(files);
+  }
+
+  fileInput.addEventListener('change', function() {
+    handleFiles(this.files);
+  });
+
+  function handleFiles(files) {
+    if (files.length > 0) {
+      uploadFile(files[0]);
+    }
+  }
+
+  function uploadFile(file) {
+    // UI Loading State
+    statusBtn.classList.add('loading');
+    errorBox.style.display = 'none';
+    
+    const formData = new FormData(form);
+    // Ensure the file from drag/drop is in the formData if not set by input
+    if (!fileInput.value && file) {
+        formData.set('csv', file);
+    }
+
+    fetch('', {
+      method: 'POST',
+      body: formData
+    })
+    .then(async response => {
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Error ${response.status}`);
+      }
+      return response.blob().then(blob => ({ blob, filename: getFilename(response) }));
+    })
+    .then(({ blob, filename }) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename || 'archivo_arreglado.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      
+      // Reset UI after short delay
+      setTimeout(() => {
+        statusBtn.classList.remove('loading');
+        fileInput.value = ''; 
+      }, 1000);
+    })
+    .catch(err => {
+      console.error(err);
+      errorText.textContent = err.message;
+      errorBox.style.display = 'block';
+      statusBtn.classList.remove('loading');
+      fileInput.value = '';
+    });
+  }
+
+  function getFilename(response) {
+    const disposition = response.headers.get('Content-Disposition');
+    if (disposition && disposition.indexOf('attachment') !== -1) {
+      const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+      const matches = filenameRegex.exec(disposition);
+      if (matches != null && matches[1]) { 
+        return matches[1].replace(/['"]/g, '');
+      }
+    }
+    return 'archivo_arreglado.csv';
+  }
+</script>
+
 </body>
 </html>
