@@ -397,6 +397,7 @@ if ($requestMethod === null) {
       min-height: 100vh;
       margin: 0;
       padding: 20px;
+      overflow: hidden;
     }
 
     .container {
@@ -456,28 +457,9 @@ if ($requestMethod === null) {
       line-height: 1.2;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       .process-steps {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      .process-steps .step-card:nth-last-child(-n+2) {
-        grid-column: span 1; /* Reset if needed, or adjust logic */
-      }
-      /* Make the last 2 center if 5 items? 3 top, 2 bottom centered */
-      .process-steps .step-card:nth-child(4) {
-        grid-column-start: 1;
-        grid-column-end: 2; /* Actually let's just let them flow or use flex wrap */
-      }
-    }
-    
-    @media (max-width: 480px) {
-       .process-steps {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .step-card {
-        width: calc(50% - 0.5rem);
+        display: none;
       }
     }
 
