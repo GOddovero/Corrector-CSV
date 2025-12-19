@@ -1,18 +1,44 @@
 import pandas as pd
 import tkinter as tk
 from tkinter import filedialog
+import unicodedata
 
 pd.set_option('display.max_columns', 20)
+
+def normalizar_nombre_columna(nombre):
+    """Normaliza nombres de columnas removiendo acentos y caracteres especiales"""
+    # Reemplazar caracteres corruptos comunes
+    nombre = nombre.replace('�', '')
+    # Normalizar unicode (remover acentos)
+    nombre = unicodedata.normalize('NFKD', nombre)
+    nombre = nombre.encode('ASCII', 'ignore').decode('ASCII')
+    return nombre.strip()
+
+def leer_csv_con_encoding(ruta):
+    """Intenta leer el CSV con diferentes encodings"""
+    encodings = ['latin-1', 'cp1252', 'utf-8', 'iso-8859-1']
+    for encoding in encodings:
+        try:
+            df = pd.read_csv(ruta, sep=';', quotechar='"', encoding=encoding)
+            # Normalizar nombres de columnas
+            df.columns = [normalizar_nombre_columna(col) for col in df.columns]
+            return df
+        except Exception as e:
+            continue
+    # Si ninguno funciona, intentar sin encoding específico
+    df = pd.read_csv(ruta, sep=';', quotechar='"')
+    df.columns = [normalizar_nombre_columna(col) for col in df.columns]
+    return df
 
 def procesar_archivos():
     # Abrir una ventana de diálogo para seleccionar los archivos CSV
     rutas_a_archivos = filedialog.askopenfilenames()  # Abrir la ventana de diálogo
 
     for ruta_al_archivo in rutas_a_archivos:
-        # Leer el archivo CSV con pandas
-        df = pd.read_csv(ruta_al_archivo, sep=';', quotechar='"')
+        # Leer el archivo CSV con pandas usando encoding adecuado
+        df = leer_csv_con_encoding(ruta_al_archivo)
 
-        columnas_a_eliminar = ['Crédito Fiscal Computable',
+        columnas_a_eliminar = ['Credito Fiscal Computable',
                     'Importe de Per. o Pagos a Cta. de Otros Imp. Nac.',
                     'Importe de Percepciones de Ingresos Brutos',
                     'Importe de Impuestos Municipales',
@@ -30,27 +56,28 @@ def procesar_archivos():
                     'Neto Gravado IVA 27%',
                     'Importe IVA 27%']
 
-        # Eliminar las columnas
-        df = df.drop(columns=columnas_a_eliminar)
-        print('Hasta aca existen estas columnas'+df.columns)
+        # Eliminar las columnas (solo las que existan)
+        columnas_existentes = [col for col in columnas_a_eliminar if col in df.columns]
+        df = df.drop(columns=columnas_existentes)
+        print('Columnas restantes: ', list(df.columns))
 
         # Agregar columnas
-        df['numero hasta'] = df['Número de Comprobante']
+        df['numero hasta'] = df['Numero de Comprobante']
         df['Cod Autorizacion'] = 0
 
         nuevos_nombres = {
-            'Fecha de Emisión': 'Fecha de emision',
+            'Fecha de Emision': 'Fecha de emision',
             'Punto de Venta': 'punto de venta',
             'Tipo Doc. Vendedor': 'tipo doc. emisor',
             'Nro. Doc. Vendedor': 'nro. doc. emisor',
-            'Denominación Vendedor': 'denominacion emisor',
+            'Denominacion Vendedor': 'denominacion emisor',
             'Importe Total': 'Imp. Total',
             'Importe No Gravado': 'imp neto no gravado',
             'Importe Exento': 'importe OpExcento',
             'Importe Otros Tributos': 'otros tributos',
             'Moneda Original': 'Moneda',
             'Total IVA': 'IVA',
-            'Número de Comprobante': 'numero desde'
+            'Numero de Comprobante': 'numero desde'
         }
 
         # Renombrar las columnas
