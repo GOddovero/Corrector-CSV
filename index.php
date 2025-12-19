@@ -401,10 +401,84 @@ if ($requestMethod === null) {
 
     .container {
       width: 100%;
-      max-width: 500px;
+      max-width: 600px;
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+    /* Process Steps (Mini Cards) */
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.75rem;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .step-card {
+      background: rgba(255, 255, 255, 0.6);
+      padding: 0.75rem 0.25rem;
+      border-radius: 0.75rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.2s;
+    }
+    
+    .step-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .step-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+      background: #eef2ff;
+      padding: 6px;
+      border-radius: 50%;
+    }
+
+    .step-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    
+    .step-desc {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      line-height: 1.2;
+    }
+
+    @media (max-width: 640px) {
+      .process-steps {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .process-steps .step-card:nth-last-child(-n+2) {
+        grid-column: span 1; /* Reset if needed, or adjust logic */
+      }
+      /* Make the last 2 center if 5 items? 3 top, 2 bottom centered */
+      .process-steps .step-card:nth-child(4) {
+        grid-column-start: 1;
+        grid-column-end: 2; /* Actually let's just let them flow or use flex wrap */
+      }
+    }
+    
+    @media (max-width: 480px) {
+       .process-steps {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .step-card {
+        width: calc(50% - 0.5rem);
+      }
     }
 
     .card {
@@ -600,6 +674,35 @@ if ($requestMethod === null) {
 <body>
 
 <div class="container">
+  
+  <div class="process-steps">
+    <div class="step-card">
+      <svg class="step-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+      <div class="step-title">1. Carga</div>
+      <div class="step-desc">Sube tu CSV</div>
+    </div>
+    <div class="step-card">
+      <svg class="step-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+      <div class="step-title">2. Análisis</div>
+      <div class="step-desc">Detecta formato</div>
+    </div>
+    <div class="step-card">
+      <svg class="step-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+      <div class="step-title">3. Corrección</div>
+      <div class="step-desc">Arregla datos</div>
+    </div>
+    <div class="step-card">
+      <svg class="step-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+      <div class="step-title">4. Limpieza</div>
+      <div class="step-desc">Quita basura</div>
+    </div>
+    <div class="step-card">
+      <svg class="step-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+      <div class="step-title">5. Descarga</div>
+      <div class="step-desc">Listo para usar</div>
+    </div>
+  </div>
+
   <div class="card">
     <h1>Corrector CSV</h1>
     <p class="subtitle">Sube tu archivo para corregir el formato automáticamente</p>
